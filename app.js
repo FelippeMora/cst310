@@ -72,28 +72,119 @@ function viewCart() {
 }
 
 
-// Part B: Display products belonging to a category.
+// Re-render to webpage.
 function filterByCategory(category) {
-    // Function scope
+    if (category === "All") {
+        renderProducts(products);
+        return;
+    }
+
     const filteredProducts = products.filter(
         product => product.category === category
     );
 
-    console.log(`${category} Products:`);
-
-    filteredProducts.forEach(function(product) {
-        console.log(
-            `${product.productName}: $${product.price.toFixed(2)}`
-        );
-    });
+    renderProducts(filteredProducts);
 }
 
 
-// Call each function.
-addToCart("Running Shoes");
-addToCart("Hiking Boots");
-addToCart("Gaming Laptop");
 
-viewCart();
+const shopTitle = document.getElementById("shop-title");
 
-filterByCategory("Footwear");
+function changeShopTitle() {
+    shopTitle.textContent = "Welcome to Felippe's Online Shop";
+}
+
+function addToCart(productName) {
+    const product = products.find(
+        item => item.productName === productName
+    );
+
+    if (product && product.inStock) {
+        cart.push(product);
+
+        document.getElementById("cart-count").textContent = cart.length;
+
+        console.log(`${product.productName} was added to the cart.`);
+    } else if (product && !product.inStock) {
+        console.log(`${product.productName} is out of stock.`);
+    } else {
+        console.log(`${productName} was not found.`);
+    }
+}
+
+function renderProducts(productsToDisplay) {
+    const productGrid = document.getElementById("product-grid");
+
+    // Clear existing products before rendering.
+    productGrid.innerHTML = "";
+
+    productsToDisplay.forEach(function(product) {
+
+        // Create the product card.
+        const card = document.createElement("div");
+        card.classList.add("product");
+
+        // Create and add the product name.
+        const name = document.createElement("h2");
+        name.textContent = product.productName;
+        card.appendChild(name);
+
+        // Create and add the category.
+        const category = document.createElement("p");
+        category.textContent = `Category: ${product.category}`;
+        card.appendChild(category);
+
+        // Create and add the price.
+        const price = document.createElement("p");
+        price.textContent = `Price: $${product.price.toFixed(2)}`;
+        card.appendChild(price);
+
+        // Create and add the stock status.
+        const status = document.createElement("p");
+        status.textContent = `Status: ${product.inStock ? "In Stock" : "Out of Stock"}`;
+        card.appendChild(status);
+
+        // Create the Add to Cart button.
+        const button = document.createElement("button");
+        button.textContent = product.inStock
+            ? "Add to Cart"
+            : "Out of Stock";
+
+        // Prevent customers from adding unavailable products.
+        if (!product.inStock) {
+            button.disabled = true;
+        }
+
+        // Add the product when its button is clicked.
+        button.addEventListener("click", function() {
+            addToCart(product.productName);
+        });
+
+        card.appendChild(button);
+
+        // Add the completed card to the product grid.
+        productGrid.appendChild(card);
+    });
+}
+
+function renderCategoryFilters() {
+    const filterContainer =
+        document.getElementById("category-filters");
+
+    const categories = ["All", "Footwear", "Food"];
+
+    categories.forEach(function(category) {
+        const button = document.createElement("button");
+
+        button.textContent = category;
+
+        button.addEventListener("click", function() {
+            filterByCategory(category);
+        });
+
+        filterContainer.appendChild(button);
+    });
+}
+
+renderCategoryFilters();
+renderProducts(products);
