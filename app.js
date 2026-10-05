@@ -1,78 +1,13 @@
-// Online Shop - Task 2
+// Online Shop - Task 4
 
-// Global scope: products and cart need to be available to all functions.
-const products = [
-    {
-        productName: "Running Shoes",
-        price: 89.99,
-        category: "Footwear",
-        inStock: true
-    },
-    {
-        productName: "Hiking Boots",
-        price: 129.99,
-        category: "Footwear",
-        inStock: false
-    },
-    {
-        productName: "Chocolate Cookies",
-        price: 5.99,
-        category: "Food",
-        inStock: true
-    },
-    {
-        productName: "Coffee Beans",
-        price: 14.99,
-        category: "Food",
-        inStock: true
-    }
-];
+import { products } from "./products.js";
+import { cart, addToCart } from "./cart.js";
 
-const cart = [];
-
-// Part A: Inspect the entire products array.
+// Inspect the products array.
 console.log("Products Array:", products);
 
 
-// Part B: Add a product to the cart.
-function addToCart(productName) {
-    // Function scope
-    const product = products.find(
-        item => item.productName === productName
-    );
-
-    if (product && product.inStock) {
-        // Block scope
-        const confirmationMessage =
-            `${product.productName} was added to the cart.`;
-
-        cart.push(product);
-        console.log(confirmationMessage);
-    } else if (product && !product.inStock) {
-        console.log(`${product.productName} is out of stock.`);
-    } else {
-        console.log(`${productName} was not found.`);
-    }
-}
-
-
-// Part B: Display the cart and calculate its total.
-function viewCart() {
-    // Function scope
-    let totalPrice = 0;
-
-    console.log("Cart Summary:");
-
-    cart.forEach(function(item) {
-        console.log(`${item.productName}: $${item.price.toFixed(2)}`);
-        totalPrice += item.price;
-    });
-
-    console.log(`Total Price: $${totalPrice.toFixed(2)}`);
-}
-
-
-// Re-render to webpage.
+// Filter products by category and re-render the webpage.
 function filterByCategory(category) {
     if (category === "All") {
         renderProducts(products);
@@ -88,29 +23,14 @@ function filterByCategory(category) {
 
 
 
-const shopTitle = document.getElementById("shop-title");
-
-function changeShopTitle() {
-    shopTitle.textContent = "Welcome to Felippe's Online Shop";
+// Update the cart counter in the navigation.
+function updateCartCount() {
+    document.getElementById("cart-count").textContent = cart.length;
 }
 
-function addToCart(productName) {
-    const product = products.find(
-        item => item.productName === productName
-    );
 
-    if (product && product.inStock) {
-        cart.push(product);
 
-        document.getElementById("cart-count").textContent = cart.length;
 
-        console.log(`${product.productName} was added to the cart.`);
-    } else if (product && !product.inStock) {
-        console.log(`${product.productName} is out of stock.`);
-    } else {
-        console.log(`${productName} was not found.`);
-    }
-}
 
 function renderProducts(productsToDisplay) {
     const productGrid = document.getElementById("product-grid");
@@ -146,26 +66,40 @@ function renderProducts(productsToDisplay) {
 
         // Create the Add to Cart button.
         const button = document.createElement("button");
-        button.textContent = product.inStock
-            ? "Add to Cart"
-            : "Out of Stock";
+        button.textContent = "Add to Cart";
 
-        // Prevent customers from adding unavailable products.
-        if (!product.inStock) {
-            button.disabled = true;
-        }
+
 
         // Add the product when its button is clicked.
-        button.addEventListener("click", function() {
-            addToCart(product.productName);
-        });
+button.addEventListener("click", function () {
+    const errorMessage = document.getElementById("error-message");
+
+    try {
+        button.disabled = true;
+
+        addToCart(product.productName);
+        updateCartCount();
+
+        errorMessage.textContent = "";
+} catch (error) {
+    errorMessage.textContent =
+        "Sorry, this item could not be added to your cart. Please check its availability.";
+
+    errorMessage.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+} finally {
+    button.disabled = false;
+}
+});
 
         card.appendChild(button);
 
         // Add the completed card to the product grid.
         productGrid.appendChild(card);
-    });
-}
+        });
+    }
 
 function renderCategoryFilters() {
     const filterContainer =
@@ -188,3 +122,4 @@ function renderCategoryFilters() {
 
 renderCategoryFilters();
 renderProducts(products);
+updateCartCount();
