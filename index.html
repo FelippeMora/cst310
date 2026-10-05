@@ -37,6 +37,11 @@
             border-radius: 6px;
             margin-bottom: 20px;
         }
+        #error-message {
+            color: #b00020;
+            font-weight: bold;
+            margin-top: 15px;
+        }
     </style>
 </head>
 
@@ -57,9 +62,10 @@
         <div id="category-filters"></div>
 
         <div id="product-grid"></div>
+        <p id="error-message" aria-live="polite"></p>
     </main>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 
 </body>
 </html>
