@@ -1,125 +1,109 @@
-// Online Shop - Task 4
+import { loadProducts } from './products.js';
+import { addToCart, removeFromCart, viewCart } from './cart.js';
 
-import { products } from "./products.js";
-import { cart, addToCart } from "./cart.js";
+let products = [];
+let activeCategory = 'All';
+const grid = document.getElementById('product-grid');
+const filters = document.getElementById('category-filters');
+const cartItems = document.getElementById('cart-items');
+const errorMessage = document.getElementById('error-message');
+const money = value => `$${value.toFixed(2)}`;
 
-// Inspect the products array.
-console.log("Products Array:", products);
-
-
-// Filter products by category and re-render the webpage.
-function filterByCategory(category) {
-    if (category === "All") {
-        renderProducts(products);
-        return;
-    }
-
-    const filteredProducts = products.filter(
-        product => product.category === category
-    );
-
-    renderProducts(filteredProducts);
-}
-
-
-
-// Update the cart counter in the navigation.
-function updateCartCount() {
-    document.getElementById("cart-count").textContent = cart.length;
-}
-
-
-
-
-
-function renderProducts(productsToDisplay) {
-    const productGrid = document.getElementById("product-grid");
-
-    // Clear existing products before rendering.
-    productGrid.innerHTML = "";
-
-    productsToDisplay.forEach(function(product) {
-
-        // Create the product card.
-        const card = document.createElement("div");
-        card.classList.add("product");
-
-        // Create and add the product name.
-        const name = document.createElement("h2");
-        name.textContent = product.productName;
-        card.appendChild(name);
-
-        // Create and add the category.
-        const category = document.createElement("p");
-        category.textContent = `Category: ${product.category}`;
-        card.appendChild(category);
-
-        // Create and add the price.
-        const price = document.createElement("p");
-        price.textContent = `Price: $${product.price.toFixed(2)}`;
-        card.appendChild(price);
-
-        // Create and add the stock status.
-        const status = document.createElement("p");
-        status.textContent = `Status: ${product.inStock ? "In Stock" : "Out of Stock"}`;
-        card.appendChild(status);
-
-        // Create the Add to Cart button.
-        const button = document.createElement("button");
-        button.textContent = "Add to Cart";
-
-
-
-        // Add the product when its button is clicked.
-button.addEventListener("click", function () {
-    const errorMessage = document.getElementById("error-message");
-
-    try {
-        button.disabled = true;
-
-        addToCart(product.productName);
-        updateCartCount();
-
-        errorMessage.textContent = "";
-} catch (error) {
-    errorMessage.textContent =
-        "Sorry, this item could not be added to your cart. Please check its availability.";
-
-    errorMessage.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
+function renderProducts() {
+  grid.replaceChildren();
+  const visible = activeCategory === 'All' ? products : products.filter(p => p.category === activeCategory);
+  if (!visible.length) {
+    const empty = document.createElement('p');
+    empty.textContent = products.length ? 'No products in this category.' : 'No products are available.';
+    grid.appendChild(empty);
+  }
+  visible.forEach(product => {
+    const card = document.createElement('article');
+    card.className = 'product';
+    const image = document.createElement('img');
+    image.src = product.thumbnail;
+    image.alt = product.productName;
+    image.loading = 'lazy';
+    const name = document.createElement('h3');
+    name.textContent = product.productName;
+    const category = document.createElement('p');
+    category.textContent = `Category: ${product.category}`;
+    const price = document.createElement('p');
+    price.textContent = `Price: ${money(product.price)}`;
+    const stock = document.createElement('p');
+    stock.textContent = product.stock > 0 ? `${product.stock} available` : 'Out of stock';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = 'Add to Cart';
+    button.disabled = product.stock < 1;
+    button.addEventListener('click', () => {
+      try {
+        addToCart(product.productName, products);
+        errorMessage.textContent = '';
+        renderCart();
+      } catch (error) {
+        errorMessage.textContent = error.message;
+      }
     });
-} finally {
-    button.disabled = false;
+    card.append(image, name, category, price, stock, button);
+    grid.appendChild(card);
+  });
 }
-});
 
-        card.appendChild(button);
-
-        // Add the completed card to the product grid.
-        productGrid.appendChild(card);
-        });
-    }
-
-function renderCategoryFilters() {
-    const filterContainer =
-        document.getElementById("category-filters");
-
-    const categories = ["All", "Footwear", "Food"];
-
-    categories.forEach(function(category) {
-        const button = document.createElement("button");
-
-        button.textContent = category;
-
-        button.addEventListener("click", function() {
-            filterByCategory(category);
-        });
-
-        filterContainer.appendChild(button);
+function renderFilters() {
+  filters.replaceChildren();
+  const categories = ['All', ...new Set(products.map(p => p.category))];
+  categories.forEach(category => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = category === 'All' ? 'All' : category.replace(/\b\w/g, c => c.toUpperCase());
+    button.setAttribute('aria-pressed', String(category === activeCategory));
+    button.addEventListener('click', () => {
+      activeCategory = category;
+      renderFilters();
+      renderProducts();
     });
+    filters.appendChild(button);
+  });
 }
 
-renderCategoryFilters();
-renderProducts(products);
-updateCartCount();
+function renderCart() {
+  cartItems.replaceChildren();
+  const items = viewCart();
+  if (!items.length) {
+    const empty = document.createElement('p');
+    empty.textContent = 'Your cart is empty.';
+    cartItems.appendChild(empty);
+  }
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'cart-row';
+    const details = document.createElement('span');
+    details.textContent = `${item.productName} — ${item.quantity} × ${money(item.price)} = ${money(item.quantity * item.price)}`;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.textContent = 'Remove';
+    remove.setAttribute('aria-label', `Remove ${item.productName} from cart`);
+    remove.addEventListener('click', () => {
+      try { removeFromCart(item.productName); errorMessage.textContent = ''; renderCart(); }
+      catch (error) { errorMessage.textContent = error.message; }
+    });
+    row.append(details, remove);
+    cartItems.appendChild(row);
+  });
+  // Calculate total AFTER rendering all cart items.
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  document.getElementById('cart-total').textContent = money(total);
+  document.getElementById('cart-count').textContent = items.reduce((sum, item) => sum + item.quantity, 0);
+}
+
+async function initializeShop() {
+  renderCart();
+  document.getElementById('loading-message').textContent = 'Loading live products…';
+  products = await loadProducts(); // Await the Promise before using the array.
+  document.getElementById('loading-message').textContent = '';
+  renderFilters();
+  renderProducts();
+}
+
+initializeShop();
