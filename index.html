@@ -1,71 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Shop - CST 310</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #f4f4f4;
-        }
-
-        nav {
-            background-color: #222;
-            padding: 15px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-right: 20px;
-        }
-
-        main {
-            max-width: 800px;
-            margin: 40px auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-        }
-
-        .product {
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-        #error-message {
-            color: #b00020;
-            font-weight: bold;
-            margin-top: 15px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Felippe's Online Shop | CST 310 Task 5</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-    <header>
-        <nav>
-            <a href="#">Home</a>
-            <a href="#">Shop</a>
-            <a href="#">Cart (<span id="cart-count">0</span>)</a>
-        </nav>
-    </header>
-
-    <main>
-        <h1>Felippe's Online Shop</h1>
-        <p>Browse our available products.</p>
-
-        <div id="category-filters"></div>
-
-        <div id="product-grid"></div>
-        <p id="error-message" aria-live="polite"></p>
-    </main>
-
-    <script type="module" src="app.js"></script>
-
+  <header><nav aria-label="Main navigation"><a href="#shop">Shop</a><a href="#cart">Cart (<span id="cart-count">0</span>)</a></nav></header>
+  <main>
+    <h1>Felippe's Online Shop</h1>
+    <p>Browse products loaded from a live API.</p>
+    <p id="loading-message" role="status"></p>
+    <p id="error-message" role="alert"></p>
+    <section id="shop" aria-labelledby="shop-heading">
+      <h2 id="shop-heading">Products</h2>
+      <div id="category-filters" aria-label="Product category filters"></div>
+      <div id="product-grid"></div>
+    </section>
+    <section id="cart" aria-labelledby="cart-heading">
+      <h2 id="cart-heading">Shopping Cart</h2>
+      <div id="cart-items"></div>
+      <p class="total"><strong>Cart Total: <span id="cart-total">$0.00</span></strong></p>
+    </section>
+  </main>
+  <footer>Course demonstration using DummyJSON sample products. No purchases are processed.</footer>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
