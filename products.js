@@ -1,7 +1,7 @@
 // Week 5: retrieve live catalog data instead of a hardcoded array.
 export async function loadProducts() {
   try {
-    const response = await fetch('https://dummyjson.com/invalid-products-endpoint?limit=30');
+    const response = await fetch('https://dummyjson.com/products?limit=30');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     if (!Array.isArray(data.products)) throw new Error('Invalid product data');
